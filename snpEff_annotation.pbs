@@ -3,6 +3,8 @@
 #PBS -l walltime=16:00:00
 #PBS -j oe
 
+
+#Sen:wq
 VCF=${INPUTVCF}
 RUNDIR=`dirname ${VCF}`
 DBVERSION=GRCh37.74
@@ -58,6 +60,7 @@ else
 		rm -f $snpEffOut
 	fi
 fi
+#rm temp files
 rm -f $snpEffInt
 
 echo "Ending snpEff Annotator."

@@ -1,4 +1,7 @@
 #!/bin/bash
+###Author:Sen Peng
+###
+
 
 outputDir=/scratch/speng/projects/IVY_GBM_rim_core/lumosVar_rimcore/treeomics_input
 for file in `find /scratch/speng/projects/IVY_GBM_rim_core/lumosVar_rimcore/filteredVCF -name "*.vcf"|sort`
