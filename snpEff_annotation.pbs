@@ -1,0 +1,63 @@
+#PBS -S /bin/bash
+#PBS -N snpEff
+#PBS -l walltime=16:00:00
+#PBS -j oe
+
+VCF=${INPUTVCF}
+RUNDIR=`dirname ${VCF}`
+DBVERSION=GRCh37.74
+SNPEFFPATH=/home/tgenref/pipeline_v0.4/bin/snpEff/snpEff_3.5h
+DBSNP=/home/tgenref/pecan/annotations/public_data_bases/DBSNP_V147/dbsnp_147.b37_norm.vcf
+ 
+echo "### DBVERSION: ${DBVERSION}"
+echo "### VCF: ${VCF}"
+echo "### SNPEFFPATH: ${SNPEFFPATH}"
+echo "### RUNDIR: ${RUNDIR}"
+
+echo "### Starting snpEff Annotator of vcf file: ${VCF}"
+OUT=${VCF/.proj.md.bam}
+snpEffOut=${OUT/.vcf/.snpEff.vcf}
+snpEffInt=${OUT/.vcf/.snpEffInt.vcf}
+snpEffTxt=${OUT/.vcf/.snpEff.txt}
+summaryOut=${OUT/.vcf/.snpEff.summary_html}
+	##-hgvs \
+	##-hgvs \
+java -Xmx6g -jar ${SNPEFFPATH}/snpEff.jar eff \
+	-v \
+	-i vcf \
+	-o txt \
+	-noLog \
+	-s ${summaryOut} \
+	-c ${SNPEFFPATH}/snpEff.config \
+	${DBVERSION} \
+	${VCF} > $snpEffTxt
+java -Xmx6g -jar ${SNPEFFPATH}/snpEff.jar eff \
+	-v \
+	-i vcf \
+	-o vcf \
+	-noLog \
+	-s ${summaryOut} \
+	-c ${SNPEFFPATH}/snpEff.config \
+	${DBVERSION} \
+	${VCF} > $snpEffInt
+if [ $? -ne 0 ] ; then
+	echo "snpEff first part failed." >> ${VCF}.snpEffOut
+	mv ${VCF}.snpEffOut ${VCF}.snpEffFail
+else
+	echo "snpEff first part complete." >> ${VCF}.snpEffOut
+	echo "snpEff second part (snpSift) starting." >> ${VCF}.snpEffOut
+	java -Xmx6g -jar ${SNPEFFPATH}/SnpSift.jar annotate \
+	${DBSNP} \
+	$snpEffInt > $snpEffOut
+	if [ $? -eq 0 ] ; then
+		echo "snpEff second part (snpSift) complete." >> ${VCF}.snpEffOut
+		mv ${VCF}.snpEffOut ${VCF}.snpEffPass
+	else
+		echo "snpEff second part (snpSift) failed." >> ${VCF}.snpEffOut
+		mv ${VCF}.snpEffOut ${VCF}.snpEffFail
+		rm -f $snpEffOut
+	fi
+fi
+rm -f $snpEffInt
+
+echo "Ending snpEff Annotator."
