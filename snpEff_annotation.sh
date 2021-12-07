@@ -1,6 +1,6 @@
 #!/bin/bash
 ##Author:Sen Peng
-
+#ajiba pull 
 
 Location_DIR=/scratch/speng/projects/IVY_GBM_rim_core/lumosVar_rimcore/filteredVCF
 OUTPUT_DIR=/scratch/speng/projects/IVY_GBM_rim_core/lumosVar_rimcore/filteredVCF
